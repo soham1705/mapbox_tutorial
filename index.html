@@ -124,6 +124,10 @@ var map = new mapboxgl.Map({
 });
 
 map.on('load', function() {
+
+  var filterHour = ['==', ['number', ['get', 'Hour']], 12];
+  var filterDay = ['!=', ['string', ['get', 'Day']], 'placeholder'];
+
    map.addLayer({
      id: 'collisions',
      type: 'circle',
@@ -152,14 +156,15 @@ map.on('load', function() {
        ],
        'circle-opacity': 0.8
      },
-     filter: ['==', ['number', ['get', 'Hour']], 12]
+     filter: ['all', filterHour, filterDay]
 
    }, 'admin-2-boundaries-dispute');
 
    document.getElementById('slider').addEventListener('input', function(e) {
      var hour = parseInt(e.target.value);
      // update the map
-     map.setFilter('collisions', ['==', ['number', ['get', 'Hour']], hour]);
+     filterHour = ['==', ['number', ['get', 'Hour']], hour];
+     map.setFilter('collisions', ['all', filterHour, filterDay]);
 
      // converting 0-23 hour to AMPM format
      var ampm = hour >= 12 ? 'PM' : 'AM';
@@ -171,7 +176,11 @@ map.on('load', function() {
 
    document.getElementById('filters').addEventListener('change', function(e) {
      var day = e.target.value;
-     // update the map filter
+     if (day === 'all') {
+       // `null` would not work for combining filters
+       filterDay = ['!=', ['string', ['get', 'Day']], 'placeholder'];
+     }
+     /* the rest of the if statement */
      if (day === 'all') {
        filterDay = ['!=', ['string', ['get', 'Day']], 'placeholder'];
      } else if (day === 'weekday') {
@@ -181,7 +190,8 @@ map.on('load', function() {
      } else {
        console.log('error');
      }
-     map.setFilter('collisions', ['all', filterDay]);
+
+     map.setFilter('collisions', ['all', filterHour, filterDay]);
    });
 
  });
