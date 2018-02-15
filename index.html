@@ -169,6 +169,21 @@ map.on('load', function() {
      document.getElementById('active-hour').innerText = hour12 + ampm;
    });
 
+   document.getElementById('filters').addEventListener('change', function(e) {
+     var day = e.target.value;
+     // update the map filter
+     if (day === 'all') {
+       filterDay = ['!=', ['string', ['get', 'Day']], 'placeholder'];
+     } else if (day === 'weekday') {
+       filterDay = ['match', ['get', 'Day'], ['Sat', 'Sun'], false, true];
+     } else if (day === 'weekend') {
+       filterDay = ['match', ['get', 'Day'], ['Sat', 'Sun'], true, false];
+     } else {
+       console.log('error');
+     }
+     map.setFilter('collisions', ['all', filterDay]);
+   });
+
  });
 
 </script>
